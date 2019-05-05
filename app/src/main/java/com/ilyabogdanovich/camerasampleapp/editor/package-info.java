@@ -1,0 +1,4 @@
+@ParametersAreNonnullByDefault
+package com.ilyabogdanovich.camerasampleapp.editor;
+
+import javax.annotation.ParametersAreNonnullByDefault;

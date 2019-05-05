@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">CameraSampleApp</string>
+
+    <string name="button_capture">Capture</string>
+    <string name="button_peek_gallery">From gallery</string>
+    <string name="button_switch_camera">Switch</string>
+
+    <string name="message_camera_waiting">Waiting for camera to be initialized…</string>
+    <string name="message_no_camera">Camera is not present</string>
+    <string name="message_no_permission">Camera permission is not granted</string>
+
+    <string-array name="filter_names">
+        <item>Original</item>
+        <item>Sepia</item>
+        <item>Exposure</item>
+        <item>Invert</item>
+        <item>RGB2YUV</item>
+        <item>Rotation</item>
+        <item>Saturation</item>
+        <item>Lighting 1</item>
+        <item>Lighting 2</item>
+        <item>Lighting 3</item>
+    </string-array>
+</resources>
