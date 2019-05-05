@@ -18,7 +18,6 @@ public class CameraManagerImpl implements CameraManager {
 
     private static final String LOG_TAG = "IB/CameraManager";
 
-    @SuppressWarnings("deprecation")
     private static class CameraInstanceImpl implements CameraInstance {
         private final Activity activity;
         private final int cameraId;
