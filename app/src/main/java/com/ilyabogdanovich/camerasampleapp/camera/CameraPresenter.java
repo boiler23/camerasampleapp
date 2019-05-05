@@ -1,5 +1,7 @@
 package com.ilyabogdanovich.camerasampleapp.camera;
 
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 
 import com.ilyabogdanovich.camerasampleapp.managers.CameraManager;
@@ -9,6 +11,8 @@ import com.ilyabogdanovich.camerasampleapp.managers.PermissionsManager;
 import io.reactivex.disposables.CompositeDisposable;
 
 class CameraPresenter {
+    private static final String LOG_TAG = "IB/CameraPresenter";
+
     private final CameraView view;
     private final CameraManager cameraManager;
     private final PermissionsManager permissionsManager;
@@ -34,7 +38,9 @@ class CameraPresenter {
         if (camera != null) {
             disposableOnPause.add(camera
                     .capture()
-                    .subscribe(this::onPictureTaken));
+                    .subscribe(
+                            this::onPictureTaken,
+                            e -> Log.e(LOG_TAG, "Failed to take picture: " + e.getMessage())));
         }
     }
 

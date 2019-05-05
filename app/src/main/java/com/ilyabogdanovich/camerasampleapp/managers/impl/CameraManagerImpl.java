@@ -101,7 +101,15 @@ public class CameraManagerImpl implements CameraManager {
 
         @Override
         public Single<byte[]> capture() {
-            return Single.create(emitter -> camera.takePicture(null, null, (data, c) -> emitter.onSuccess(data)));
+            return Single.create(emitter ->
+                camera.takePicture(null, null, (data, c) -> {
+                    if (data != null) {
+                        emitter.onSuccess(data);
+                    } else {
+                        emitter.onError(new RuntimeException("Camera captured bytes must not be null!"));
+                    }
+                })
+            );
         }
 
         @Override
