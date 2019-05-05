@@ -48,12 +48,14 @@ public class NavigationManagerImpl implements NavigationManager {
 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == Activity.RESULT_CANCELED) {
+            gallerySubject.onComplete();
             return;
         }
 
         if (requestCode == GALLERY) {
             if (data != null) {
                 gallerySubject.onNext(data.getData());
+                gallerySubject.onComplete();
             }
         }
     }
