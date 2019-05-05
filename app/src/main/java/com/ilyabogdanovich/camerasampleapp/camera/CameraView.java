@@ -4,7 +4,7 @@ import com.ilyabogdanovich.camerasampleapp.managers.CameraManager;
 
 import io.reactivex.Observable;
 
-public interface CameraView {
+interface CameraView {
     void showCameraButtons(boolean show);
     void showPlaceholder(boolean show);
     void showNoCameraMessage(boolean show);

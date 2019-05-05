@@ -17,7 +17,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class CameraPresenterTest {
-    private CameraView mockView = new CameraView() {
+    private final CameraView mockView = new CameraView() {
         @Override
         public void showCameraButtons(boolean show) { }
 

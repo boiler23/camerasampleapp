@@ -16,7 +16,7 @@ import java.io.IOException;
 public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
     private static final String LOG_TAG = "IB/CameraPreview";
 
-    private SurfaceHolder holder;
+    private final SurfaceHolder holder;
     @Nullable
     private CameraManager.CameraInstance camera;
 

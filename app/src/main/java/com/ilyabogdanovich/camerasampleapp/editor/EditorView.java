@@ -7,7 +7,7 @@ import androidx.annotation.Nullable;
 
 import io.reactivex.Observable;
 
-public interface EditorView {
+interface EditorView {
     void setMainBitmap(Bitmap bitmap);
     void clearMainColorFilter();
     void setMainColorFilter(@Nullable ColorFilter colorFilter);

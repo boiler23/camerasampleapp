@@ -38,9 +38,9 @@ public class CameraActivity extends AppCompatActivity implements CameraView {
     private CameraPreview cameraPreview = null;
     private CameraPresenter presenter;
 
-    private Subject<CameraView> subjectCapture = PublishSubject.create();
-    private Subject<CameraView> subjectOpenGallery = PublishSubject.create();
-    private Subject<CameraView> subjectSwitchCamera = PublishSubject.create();
+    private final Subject<CameraView> subjectCapture = PublishSubject.create();
+    private final Subject<CameraView> subjectOpenGallery = PublishSubject.create();
+    private final Subject<CameraView> subjectSwitchCamera = PublishSubject.create();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

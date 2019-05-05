@@ -56,7 +56,7 @@ public class FilterListAdapter extends RecyclerView.Adapter<FilterListAdapter.Vi
 
     private int selectedItem = 0;
     private FilterListItem[] items = new FilterListItem[0];
-    private Subject<Integer> itemClickSubject = PublishSubject.create();
+    private final Subject<Integer> itemClickSubject = PublishSubject.create();
 
     void setItems(FilterListItem[] items) {
         this.items = items;

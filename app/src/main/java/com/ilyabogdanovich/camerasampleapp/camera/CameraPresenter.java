@@ -13,8 +13,8 @@ class CameraPresenter {
     private final CameraManager cameraManager;
     private final PermissionsManager permissionsManager;
     private final NavigationManager navigationManager;
-    private CompositeDisposable disposableOnPause = new CompositeDisposable();
-    private CompositeDisposable disposableOnDestroy = new CompositeDisposable();
+    private final CompositeDisposable disposableOnPause = new CompositeDisposable();
+    private final CompositeDisposable disposableOnDestroy = new CompositeDisposable();
     @Nullable
     private CameraManager.CameraInstance camera = null;
     private int cameraId = CameraManager.CAMERA_BACK_ID;

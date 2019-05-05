@@ -30,7 +30,7 @@ public class EditorActivity extends AppCompatActivity implements EditorView {
     private ImageView imageView;
     private FilterListAdapter filterListAdapter;
 
-    private Subject<EditorView> shareClickSubject = PublishSubject.create();
+    private final Subject<EditorView> shareClickSubject = PublishSubject.create();
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
