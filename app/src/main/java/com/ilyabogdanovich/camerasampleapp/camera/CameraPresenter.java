@@ -38,18 +38,13 @@ class CameraPresenter {
         if (camera != null) {
             disposableOnPause.add(camera
                     .capture()
+                    .flatMap(navigationManager::editPhotoFromCamera)
+                    .doOnSubscribe(d -> view.showProgress(true))
+                    .doFinally(() -> view.showProgress(false))
                     .subscribe(
-                            this::onPictureTaken,
+                            s -> {},
                             e -> Log.e(LOG_TAG, "Failed to take picture: " + e.getMessage())));
         }
-    }
-
-    private void onPictureTaken(byte[] bytes) {
-        disposableOnPause.add(navigationManager
-                .editPhotoFromCamera(bytes)
-                .doOnSubscribe(d -> view.showProgress(true))
-                .doFinally(() -> view.showProgress(false))
-                .subscribe());
     }
 
     private void openGallery() {

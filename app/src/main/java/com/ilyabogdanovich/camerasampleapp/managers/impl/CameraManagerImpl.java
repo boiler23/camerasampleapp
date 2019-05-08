@@ -11,7 +11,8 @@ import com.ilyabogdanovich.camerasampleapp.managers.CameraManager;
 
 import java.io.IOException;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeEmitter;
 
 public class CameraManagerImpl implements CameraManager {
     private final Activity activity;
@@ -22,6 +23,7 @@ public class CameraManagerImpl implements CameraManager {
         private final Activity activity;
         private final int cameraId;
         private final Camera camera;
+        private boolean isAutoFocusSupported = false;
 
         /** A safe way to get an instance of the Camera object. */
         private static Camera getCameraInstance(int cameraId) {
@@ -36,7 +38,7 @@ public class CameraManagerImpl implements CameraManager {
             return c;
         }
 
-        private static void setCameraDisplayOrientation(Activity activity, int cameraId, Camera camera) {
+        private static boolean configure(Activity activity, int cameraId, Camera camera) {
             Camera.CameraInfo info =
                     new android.hardware.Camera.CameraInfo();
             Camera.getCameraInfo(cameraId, info);
@@ -71,7 +73,13 @@ public class CameraManagerImpl implements CameraManager {
             parameters.setJpegQuality(90);
             Camera.Size previewSize = parameters.getPreviewSize();
             parameters.setPictureSize(previewSize.width, previewSize.height);
+            boolean isAutoFocus =
+                    parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO);
+            if (isAutoFocus) {
+                parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+            }
             camera.setParameters(parameters);
+            return isAutoFocus;
         }
 
         CameraInstanceImpl(Activity activity, int cameraId) {
@@ -99,21 +107,34 @@ public class CameraManagerImpl implements CameraManager {
         }
 
         @Override
-        public Single<byte[]> capture() {
-            return Single.create(emitter ->
-                camera.takePicture(null, null, (data, c) -> {
-                    if (data != null) {
-                        emitter.onSuccess(data);
-                    } else {
-                        emitter.onError(new RuntimeException("Camera captured bytes must not be null!"));
-                    }
-                })
-            );
+        public Maybe<byte[]> capture() {
+            if (isAutoFocusSupported) {
+                return Maybe.create(emitter ->
+                        camera.autoFocus(((success, c) -> {
+                            if (success) {
+                                takePicture(emitter);
+                            } else {
+                                emitter.onComplete();
+                            }
+                        })));
+            } else {
+                return Maybe.create(this::takePicture);
+            }
+        }
+
+        private void takePicture(MaybeEmitter<byte[]> emitter) {
+            camera.takePicture(null, null, (data, cam) -> {
+                if (data != null) {
+                    emitter.onSuccess(data);
+                } else {
+                    emitter.onError(new RuntimeException("Camera captured bytes must not be null!"));
+                }
+            });
         }
 
         @Override
         public void resize() {
-            setCameraDisplayOrientation(activity, cameraId, camera);
+            isAutoFocusSupported = configure(activity, cameraId, camera);
         }
 
         @Override

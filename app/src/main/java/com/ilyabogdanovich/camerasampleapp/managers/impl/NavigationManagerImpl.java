@@ -15,7 +15,6 @@ import com.ilyabogdanovich.camerasampleapp.managers.NavigationManager;
 import java.io.File;
 
 import io.reactivex.Maybe;
-import io.reactivex.Single;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subjects.PublishSubject;
@@ -61,8 +60,8 @@ public class NavigationManagerImpl implements NavigationManager {
     }
 
     @Override
-    public Single<String> editPhotoFromCamera(byte[] bytes) {
-        return Single.fromCallable(() -> imageManager.grabImageFromBytes(bytes))
+    public Maybe<String> editPhotoFromCamera(byte[] bytes) {
+        return Maybe.fromCallable(() -> imageManager.grabImageFromBytes(bytes))
                 .subscribeOn(Schedulers.computation())
                 .observeOn(AndroidSchedulers.mainThread())
                 .doOnSuccess(this::openEditor);

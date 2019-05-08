@@ -6,8 +6,8 @@ import com.ilyabogdanovich.camerasampleapp.managers.PermissionsManager;
 
 import org.junit.Test;
 
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.Single;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -146,7 +146,7 @@ public class CameraPresenterTest {
                 .thenReturn(Observable.just(view));
 
         CameraManager.CameraInstance camera = mock(CameraManager.CameraInstance.class);
-        when(camera.capture()).thenReturn(Single.just(new byte[0]));
+        when(camera.capture()).thenReturn(Maybe.just(new byte[0]));
 
         CameraManager cameraManager = mock(CameraManager.class);
         when(cameraManager.checkCameraExists())
@@ -160,7 +160,7 @@ public class CameraPresenterTest {
 
         NavigationManager navigationManager = mock(NavigationManager.class);
         when(navigationManager.editPhotoFromCamera(any()))
-                .thenReturn(Single.just("test.jpg"));
+                .thenReturn(Maybe.just("test.jpg"));
 
         CameraPresenter presenter =
                 new CameraPresenter(view, cameraManager, permissionsManager, navigationManager);

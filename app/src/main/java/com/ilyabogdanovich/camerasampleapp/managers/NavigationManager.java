@@ -12,7 +12,7 @@ public interface NavigationManager {
     @CheckReturnValue
     Maybe<String> editPhotoFromGallery();
     @CheckReturnValue
-    Single<String> editPhotoFromCamera(byte[] bytes);
+    Maybe<String> editPhotoFromCamera(byte[] bytes);
     void shareImage(String imagePath);
     void onActivityResult(int requestCode, int resultCode, @Nullable Intent data);
 }

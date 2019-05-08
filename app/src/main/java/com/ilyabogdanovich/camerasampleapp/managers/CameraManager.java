@@ -4,6 +4,7 @@ import android.view.SurfaceHolder;
 
 import java.io.IOException;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 
 public interface CameraManager {
@@ -14,7 +15,7 @@ public interface CameraManager {
         void setPreviewDisplay(SurfaceHolder surfaceHolder) throws IOException;
         void startPreview();
         void stopPreview();
-        Single<byte[]> capture();
+        Maybe<byte[]> capture();
         void resize();
         void release();
     }
