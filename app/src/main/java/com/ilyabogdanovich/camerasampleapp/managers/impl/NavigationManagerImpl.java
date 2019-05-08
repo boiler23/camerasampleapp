@@ -24,7 +24,7 @@ public class NavigationManagerImpl implements NavigationManager {
     private static final int GALLERY = 100;
     private final Activity activity;
     private final ImageManager imageManager;
-    private final Subject<Uri> gallerySubject = PublishSubject.create();
+    private Subject<Uri> gallerySubject;
 
     public NavigationManagerImpl(Activity activity, ImageManager imageManager) {
         this.activity = activity;
@@ -37,6 +37,7 @@ public class NavigationManagerImpl implements NavigationManager {
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
         activity.startActivityForResult(galleryIntent, GALLERY);
+        gallerySubject = PublishSubject.create(); // create new subject for each new call to gallery
         return gallerySubject
                 .firstElement()
                 .subscribeOn(Schedulers.computation())
@@ -46,12 +47,12 @@ public class NavigationManagerImpl implements NavigationManager {
     }
 
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == Activity.RESULT_CANCELED) {
-            gallerySubject.onComplete();
-            return;
-        }
-
         if (requestCode == GALLERY) {
+            if (resultCode == Activity.RESULT_CANCELED) {
+                gallerySubject.onComplete();
+                return;
+            }
+
             if (data != null) {
                 gallerySubject.onNext(data.getData());
                 gallerySubject.onComplete();
