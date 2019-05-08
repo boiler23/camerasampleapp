@@ -4,13 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".camera.CameraActivity">
+    tools:context=".camera.CameraActivity"
+    android:background="#000">
 
     <FrameLayout
         android:id="@+id/layout_preview"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#000">
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true">
         <TextView
             android:id="@+id/text_camera_waiting"
             android:textColor="#fff"

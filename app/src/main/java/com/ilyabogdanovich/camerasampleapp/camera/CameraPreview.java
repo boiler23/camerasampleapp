@@ -34,7 +34,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     public void setCamera(@Nullable CameraManager.CameraInstance camera) {
         this.camera = camera;
         if (this.camera != null) {
-            handleSurfaceChanged();
+            handleSurfaceChanged(getWidth(), getHeight());
         }
     }
 
@@ -54,10 +54,10 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        handleSurfaceChanged();
+        handleSurfaceChanged(width, height);
     }
 
-    private void handleSurfaceChanged() {
+    private void handleSurfaceChanged(int width, int height) {
         if (camera == null) {
             return;
         }
@@ -74,7 +74,7 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
             // ignore: tried to stop a non-existent preview
         }
 
-        camera.resize();
+        camera.configure(width, height);
 
         // start preview with new settings
         try {
@@ -88,5 +88,18 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
     @Override
     public void surfaceDestroyed(SurfaceHolder holder) {
         setCamera(null);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int height = MeasureSpec.getSize(heightMeasureSpec);
+
+        CameraManager.Size previewSize = camera != null? camera.measurePreview(width, height) : null;
+        if (previewSize != null) {
+            setMeasuredDimension(previewSize.width, previewSize.height);
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
     }
 }

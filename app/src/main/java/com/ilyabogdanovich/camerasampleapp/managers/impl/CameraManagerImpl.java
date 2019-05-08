@@ -7,9 +7,12 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import androidx.annotation.Nullable;
+
 import com.ilyabogdanovich.camerasampleapp.managers.CameraManager;
 
 import java.io.IOException;
+import java.util.List;
 
 import io.reactivex.Maybe;
 import io.reactivex.MaybeEmitter;
@@ -23,7 +26,12 @@ public class CameraManagerImpl implements CameraManager {
         private final Activity activity;
         private final int cameraId;
         private final Camera camera;
+
         private boolean isAutoFocusSupported = false;
+        @Nullable
+        private List<Camera.Size> supportedPreviewSizes = null;
+
+        private Camera.Size previewSize = null;
 
         /** A safe way to get an instance of the Camera object. */
         private static Camera getCameraInstance(int cameraId) {
@@ -38,10 +46,7 @@ public class CameraManagerImpl implements CameraManager {
             return c;
         }
 
-        private static boolean configure(Activity activity, int cameraId, Camera camera) {
-            Camera.CameraInfo info =
-                    new android.hardware.Camera.CameraInfo();
-            Camera.getCameraInfo(cameraId, info);
+        private int getScreenRotation() {
             int rotation = activity.getWindowManager().getDefaultDisplay()
                     .getRotation();
             int degrees = 0;
@@ -52,12 +57,20 @@ public class CameraManagerImpl implements CameraManager {
                 case Surface.ROTATION_270: degrees = 270; break;
             }
 
+            return degrees;
+        }
+
+        private void configureOrientation(Camera.Parameters parameters) {
+            Camera.CameraInfo info =
+                    new android.hardware.Camera.CameraInfo();
+            Camera.getCameraInfo(cameraId, info);
+            int degrees = getScreenRotation();
+
             Log.w(LOG_TAG, "screen orientation: " + degrees);
             Log.w(LOG_TAG, "camera orientation: " + info.orientation);
 
             int result = (info.orientation - degrees + 360) % 360;
 
-            Camera.Parameters parameters = camera.getParameters();
             if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                 parameters.setRotation(result);
                 result = (result + 180) % 360;
@@ -69,17 +82,60 @@ public class CameraManagerImpl implements CameraManager {
                 camera.setDisplayOrientation(result);
                 parameters.setRotation(result);
             }
+        }
 
+        private void configureQuality(Camera.Parameters parameters) {
             parameters.setJpegQuality(90);
-            Camera.Size previewSize = parameters.getPreviewSize();
-            parameters.setPictureSize(previewSize.width, previewSize.height);
-            boolean isAutoFocus =
+        }
+
+        private void configureAutoFocus(Camera.Parameters parameters) {
+            isAutoFocusSupported =
                     parameters.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_AUTO);
-            if (isAutoFocus) {
+            if (isAutoFocusSupported) {
                 parameters.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
             }
-            camera.setParameters(parameters);
-            return isAutoFocus;
+        }
+
+        static Camera.Size getBestPreviewSize(List<Camera.Size> sizes, int targetWidth, int targetHeight) {
+            final double ASPECT_TOLERANCE = 0.1;
+            double targetRatio = (double) targetHeight / targetWidth;
+
+            Camera.Size bestSize = null;
+            double minDiff = Double.MAX_VALUE;
+
+            for (Camera.Size size : sizes) {
+                double ratio = (double) size.width / size.height;
+                if (Math.abs(ratio - targetRatio) > ASPECT_TOLERANCE) {
+                    continue;
+                }
+                if (Math.abs(size.height - targetHeight) < minDiff) {
+                    bestSize = size;
+                    minDiff = Math.abs(size.height - targetHeight);
+                }
+            }
+
+            if (bestSize == null) {
+                minDiff = Double.MAX_VALUE;
+                for (Camera.Size size : sizes) {
+                    if (Math.abs(size.height - targetHeight) < minDiff) {
+                        bestSize = size;
+                        minDiff = Math.abs(size.height - targetHeight);
+                    }
+                }
+            }
+
+            return bestSize;
+        }
+
+        private void configureSize(Camera.Parameters parameters, int width, int height) {
+            if (width > 0 && height > 0) {
+                supportedPreviewSizes = parameters.getSupportedPreviewSizes();
+                if (supportedPreviewSizes != null) {
+                    previewSize = getBestPreviewSize(supportedPreviewSizes, width, height);
+                    parameters.setPreviewSize(previewSize.width, previewSize.height);
+                    parameters.setPictureSize(previewSize.width, previewSize.height);
+                }
+            }
         }
 
         CameraInstanceImpl(Activity activity, int cameraId) {
@@ -87,7 +143,7 @@ public class CameraManagerImpl implements CameraManager {
             this.cameraId = cameraId;
             this.camera = getCameraInstance(cameraId);
             if (this.camera != null) {
-                resize();
+                this.supportedPreviewSizes = camera.getParameters().getSupportedPictureSizes();
             }
         }
 
@@ -133,8 +189,45 @@ public class CameraManagerImpl implements CameraManager {
         }
 
         @Override
-        public void resize() {
-            isAutoFocusSupported = configure(activity, cameraId, camera);
+        public void configure(int width, int height) {
+            Camera.Parameters parameters = camera.getParameters();
+
+            configureQuality(parameters);
+            configureAutoFocus(parameters);
+            configureOrientation(parameters);
+            configureSize(parameters, width, height);
+
+            camera.setParameters(parameters);
+        }
+
+        @Nullable
+        @Override
+        public Size measurePreview(int width, int height) {
+            if (supportedPreviewSizes == null) {
+                return null;
+            }
+
+            previewSize = getBestPreviewSize(supportedPreviewSizes, width, height);
+
+            if (previewSize != null) {
+                float ratio;
+                if (getScreenRotation() % 180 == 0) {
+                    if (previewSize.height >= previewSize.width) {
+                        ratio = (float) previewSize.height / (float) previewSize.width;
+                    } else {
+                        ratio = (float) previewSize.width / (float) previewSize.height;
+                    }
+                } else {
+                    if (previewSize.height >= previewSize.width) {
+                        ratio = (float) previewSize.width / (float) previewSize.height;
+                    } else {
+                        ratio = (float) previewSize.height / (float) previewSize.width;
+                    }
+                }
+                return new Size(width, (int) (width * ratio));
+            }
+
+            return null;
         }
 
         @Override

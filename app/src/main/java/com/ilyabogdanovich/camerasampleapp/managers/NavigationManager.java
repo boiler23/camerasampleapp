@@ -5,7 +5,6 @@ import android.content.Intent;
 import androidx.annotation.Nullable;
 
 import io.reactivex.Maybe;
-import io.reactivex.Single;
 import io.reactivex.annotations.CheckReturnValue;
 
 public interface NavigationManager {
